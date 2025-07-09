@@ -1,6 +1,3 @@
-// To run this code you need to install the following dependencies:
-// npm install @google/genai mime
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // You should not hard-code your API key in production.
@@ -32,7 +29,22 @@ const run = async (prompt) => {
         throw new Error("Gemini API not initialized.");
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // Get a generative model with grounding enabled
+    const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+        tools: [{
+            "googleSearch": {}
+        }],
+        // NEW: Add this configuration to force the model to use a tool
+        toolConfig: {
+            functionCallingConfig: {
+                // Setting the mode to ANY forces the model to call a tool.
+                // Since googleSearch is the only one available, it will be used.
+                mode: "ANY",
+            },
+        },
+    });
+
     try {
         const result = await model.generateContent(prompt);
         const response = result.response;
